@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Changelog — Algorithm Visualizer</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d2e;
+    --accent: #6c63ff;
+    --text: #e2e4f0;
+    --muted: #7a7f9a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 60px 24px;
+  }
+
+  h1 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #6c63ff, #ff6584, #43e97b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 1rem;
+    margin-bottom: 48px;
+  }
+
+  .release {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 35px;
+    border: 1px solid rgba(255,255,255,.06);
+    box-shadow: 0 8px 32px rgba(0,0,0,.3);
+    margin-bottom: 30px;
+    position: relative;
+    overflow: hidden;
+  }
+  .release::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #6c63ff, #06b6d4, #43e97b);
+  }
+
+  .release-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .version-badge {
+    padding: 6px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    background: rgba(108,99,255,.2);
+    color: #a78bfa;
+  }
+  .release-date {
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .release-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+
+  .change-section {
+    margin-bottom: 24px;
+  }
+  .change-section:last-child { margin-bottom: 0; }
+
+  .change-type {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-bottom: 12px;
+  }
+  .change-type.added {
+    background: rgba(67,233,123,.15);
+    color: #43e97b;
+  }
+  .change-type.changed {
+    background: rgba(255,202,40,.15);
+    color: #ffca28;
+  }
+  .change-type.structure {
+    background: rgba(6,182,212,.15);
+    color: #67e8f9;
+  }
+
+  .change-list {
+    list-style: none;
+    padding: 0;
+  }
+  .change-list li {
+    padding: 8px 0 8px 20px;
+    position: relative;
+    color: var(--muted);
+    font-size: .95rem;
+    border-bottom: 1px solid rgba(255,255,255,.04);
+  }
+  .change-list li:last-child { border-bottom: none; }
+  .change-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 16px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+  .added + .change-list li::before { background: #43e97b; }
+  .changed + .change-list li::before { background: #ffca28; }
+  .structure + .change-list li::before { background: #67e8f9; }
+
+  .file-ref {
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+    font-size: .85rem;
+    padding: 2px 8px;
+    border-radius: 5px;
+    background: rgba(255,255,255,.06);
+    color: #a78bfa;
+  }
+
+  .detail-card {
+    background: rgba(0,0,0,.25);
+    border-radius: 14px;
+    padding: 20px;
+    margin: 16px 0;
+  }
+  .detail-card h4 {
+    font-size: .95rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .detail-card p {
+    color: var(--muted);
+    font-size: .9rem;
+  }
+
+  .algo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .algo-chip {
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid rgba(255,255,255,.06);
+    text-align: center;
+  }
+  .algo-chip.bfs { background: rgba(108,99,255,.1); color: #a78bfa; }
+  .algo-chip.dfs { background: rgba(249,115,22,.1); color: #fb923c; }
+  .algo-chip.dijkstra { background: rgba(6,182,212,.1); color: #67e8f9; }
+  .algo-chip.prim { background: rgba(67,233,123,.1); color: #43e97b; }
+  .algo-chip.astar { background: rgba(236,72,153,.1); color: #f472b6; }
+
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all .25s;
+    margin-top: 20px;
+  }
+  .nav-link:hover { background: #5a52e0; transform: translateY(-2px); }
+
+  .footer {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 13px;
+    border-top: 1px solid rgba(255,255,255,.06);
+    margin-top: 40px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Changelog</h1>
+  <p class="subtitle">What's new in Algorithm Visualizer</p>
+
+  <div class="release">
+    <div class="release-header">
+      <span class="version-badge">v2.0</span>
+      <span class="release-date">February 28, 2026</span>
+    </div>
+    <div class="release-title">Landing Page + Graph Algorithms</div>
+
+    <!-- STRUCTURE CHANGES -->
+    <div class="change-section">
+      <div class="change-type structure">Project Structure</div>
+      <ul class="change-list">
+        <li>Restructured the site from a single-page app into a multi-page architecture with a central landing hub</li>
+        <li>Renamed <span class="file-ref">public/index.html</span> (sorting page) to <span class="file-ref">public/sorting.html</span> to give it a dedicated URL</li>
+        <li>Created a new <span class="file-ref">public/index.html</span> as the landing page, now served at the root URL <code>/</code></li>
+        <li>Created <span class="file-ref">public/graphs.html</span> for graph algorithm visualizations</li>
+        <li>No changes to <span class="file-ref">server.js</span> — Express static file serving handles the new structure automatically</li>
+      </ul>
+    </div>
+
+    <!-- ADDED: LANDING PAGE -->
+    <div class="change-section">
+      <div class="change-type added">Added: Landing Page</div>
+      <ul class="change-list">
+        <li>New visually engaging hub page at <code>/</code> that guides users to both algorithm sections</li>
+        <li>Animated hero section with gradient title "Algorithm Visualizer" and radial gradient pulse background</li>
+        <li>Two interactive feature cards in a responsive grid layout</li>
+        <li>Each card includes a self-running animated SVG preview — the sorting card shows a mini bubble sort, the graph card shows a mini BFS traversal</li>
+        <li>Algorithm tags (badges) on each card list all 5 algorithms available in that section</li>
+        <li>Hover effects with translateY lift and enhanced box shadow</li>
+        <li>Glassmorphism sticky navigation bar with links to both section pages</li>
+        <li>Fully responsive — cards stack vertically on mobile viewports</li>
+      </ul>
+    </div>
+
+    <!-- ADDED: GRAPH ALGORITHMS -->
+    <div class="change-section">
+      <div class="change-type added">Added: Graph Algorithms Page</div>
+      <ul class="change-list">
+        <li>Brand new page with 5 interactive graph algorithm visualizations matching the sorting page's design language</li>
+        <li>SVG-based node-edge graph rendering with pre-computed node positions (no force layout needed)</li>
+        <li>Each algorithm has: animated visualization, color-coded legend, controls (Run/Reset + speed slider), live status text, complexity badges, and step-by-step explanation cards</li>
+        <li>Unique color gradient per algorithm for visual identity (accent bar on top of each card)</li>
+      </ul>
+
+      <div class="detail-card">
+        <h4>5 Graph Algorithms Visualized</h4>
+        <div class="algo-grid">
+          <div class="algo-chip bfs">BFS<br><small>Level-by-level traversal</small></div>
+          <div class="algo-chip dfs">DFS<br><small>Depth-first with backtracking</small></div>
+          <div class="algo-chip dijkstra">Dijkstra<br><small>Weighted shortest path</small></div>
+          <div class="algo-chip prim">Prim's MST<br><small>Minimum spanning tree</small></div>
+          <div class="algo-chip astar">A* Search<br><small>Heuristic grid pathfinding</small></div>
+        </div>
+      </div>
+
+      <ul class="change-list">
+        <li><strong>BFS &amp; DFS</strong> share the same 8-node unweighted graph for easy comparison between traversal strategies</li>
+        <li><strong>Dijkstra &amp; Prim's</strong> share the same 8-node weighted graph with edge weight labels displayed on each edge</li>
+        <li><strong>Dijkstra</strong> shows live distance labels under each node (initially infinity, updated as edges are relaxed) and highlights the shortest path tree at the end</li>
+        <li><strong>Prim's MST</strong> highlights candidate edges in yellow, the cheapest pick in pink, and the growing tree in green, with a running total weight counter</li>
+        <li><strong>A* Search</strong> uses a completely different visualization: a 20x12 interactive SVG grid where users can click to place/remove walls, generate random mazes, and watch the open set (yellow), closed set (cyan), and final path (purple) unfold</li>
+      </ul>
+    </div>
+
+    <!-- CHANGED: SORTING PAGE -->
+    <div class="change-section">
+      <div class="change-type changed">Changed: Sorting Page</div>
+      <ul class="change-list">
+        <li>Moved from <span class="file-ref">public/index.html</span> to <span class="file-ref">public/sorting.html</span></li>
+        <li>Added "Home" navigation link to return to the landing page</li>
+        <li>Added "Graph Algorithms" navigation link for cross-page navigation</li>
+        <li>All sorting algorithm visualizations and functionality remain unchanged</li>
+      </ul>
+    </div>
+
+    <!-- TECHNICAL DETAILS -->
+    <div class="change-section">
+      <div class="change-type structure">Technical Details</div>
+      <ul class="change-list">
+        <li>All pages use the same CSS design tokens (colors, fonts, spacing, card styles) for visual consistency</li>
+        <li>Graph algorithms use the same async/await + sleep + cancellation animation pattern as the sorting page</li>
+        <li>Graph page uses a shared <code>drawGraph()</code> function that handles both weighted and unweighted graph rendering with configurable node/edge colors and distance labels</li>
+        <li>A* grid uses SVG <code>&lt;rect&gt;</code> elements with <code>mousedown</code>/<code>mousemove</code> event handlers for wall drawing</li>
+        <li>All pages are fully self-contained HTML files with inline CSS and JavaScript — no external dependencies, no build step</li>
+        <li>Responsive across all screen sizes</li>
+      </ul>
+    </div>
+  </div>
+
+  <a href="/" class="nav-link">Back to Home</a>
+</div>
+
+<footer class="footer">
+  Algorithm Visualizer &mdash; Changelog
+</footer>
+
+</body>
+</html>
