@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Top 5 Graph Algorithms — Visual Guide</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d2e;
+    --accent: #6c63ff;
+    --accent2: #ff6584;
+    --accent3: #43e97b;
+    --text: #e2e4f0;
+    --muted: #7a7f9a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* Hero */
+  .hero {
+    text-align: center;
+    padding: 60px 20px 30px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at 50% 80%, rgba(6,182,212,.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(108,99,255,.1) 0%, transparent 40%);
+    animation: heroPulse 8s ease-in-out infinite alternate;
+  }
+  @keyframes heroPulse {
+    from { transform: scale(1) rotate(0deg); }
+    to { transform: scale(1.1) rotate(3deg); }
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    position: relative;
+    background: linear-gradient(135deg, #06b6d4, #6c63ff, #43e97b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+  }
+  .hero p {
+    font-size: 1.1rem;
+    color: var(--muted);
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* Nav pills */
+  .nav-pills {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(15,17,23,.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(6,182,212,.15);
+  }
+  .nav-pills a {
+    text-decoration: none;
+    color: var(--muted);
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid rgba(255,255,255,.08);
+    transition: all .25s;
+  }
+  .nav-pills a:hover {
+    color: #fff;
+    border-color: #06b6d4;
+    background: rgba(6,182,212,.15);
+  }
+
+  /* Section */
+  .algo-section {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+  .algo-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 35px;
+    border: 1px solid rgba(255,255,255,.06);
+    box-shadow: 0 8px 32px rgba(0,0,0,.3);
+    position: relative;
+    overflow: hidden;
+  }
+  .algo-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .algo-card.bfs::before { background: linear-gradient(90deg, #6c63ff, #a78bfa); }
+  .algo-card.dfs::before { background: linear-gradient(90deg, #f97316, #fb923c); }
+  .algo-card.dijkstra::before { background: linear-gradient(90deg, #06b6d4, #67e8f9); }
+  .algo-card.prim::before { background: linear-gradient(90deg, #43e97b, #38f9d7); }
+  .algo-card.astar::before { background: linear-gradient(90deg, #ec4899, #f472b6); }
+
+  .algo-header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .algo-number {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  .bfs .algo-number { background: rgba(108,99,255,.2); color: #a78bfa; }
+  .dfs .algo-number { background: rgba(249,115,22,.2); color: #fb923c; }
+  .dijkstra .algo-number { background: rgba(6,182,212,.2); color: #67e8f9; }
+  .prim .algo-number { background: rgba(67,233,123,.2); color: #43e97b; }
+  .astar .algo-number { background: rgba(236,72,153,.2); color: #f472b6; }
+
+  .algo-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+  }
+  .algo-desc {
+    color: var(--muted);
+    margin-bottom: 18px;
+    font-size: .95rem;
+  }
+
+  /* Complexity badges */
+  .complexity {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.08);
+  }
+  .badge .label { color: var(--muted); font-weight: 400; }
+
+  /* Visualization area */
+  .viz-area {
+    background: rgba(0,0,0,.25);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 18px;
+    min-height: 280px;
+    position: relative;
+  }
+  .viz-svg {
+    width: 100%;
+    height: 300px;
+    display: block;
+  }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .btn {
+    padding: 9px 22px;
+    border-radius: 10px;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: #5a52e0; transform: translateY(-1px); }
+  .btn-secondary {
+    background: rgba(255,255,255,.08);
+    color: var(--text);
+  }
+  .btn-secondary:hover { background: rgba(255,255,255,.14); }
+  .speed-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .speed-control input[type=range] {
+    width: 80px;
+    accent-color: var(--accent);
+  }
+  .status-text {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 10px;
+    min-height: 20px;
+  }
+
+  /* Steps explanation */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 20px;
+  }
+  .step {
+    padding: 14px;
+    background: rgba(255,255,255,.03);
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,.06);
+  }
+  .step-num {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .bfs .step-num { color: #a78bfa; }
+  .dfs .step-num { color: #fb923c; }
+  .dijkstra .step-num { color: #67e8f9; }
+  .prim .step-num { color: #43e97b; }
+  .astar .step-num { color: #f472b6; }
+  .step p { font-size: 13px; color: var(--muted); }
+
+  /* Legend */
+  .legend {
+    display: flex; gap: 18px; flex-wrap: wrap;
+    margin-bottom: 12px; font-size: 13px; color: var(--muted);
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 6px;
+  }
+  .legend-swatch {
+    width: 14px; height: 14px; border-radius: 3px;
+  }
+
+  /* A* grid controls */
+  .grid-controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 13px;
+    border-top: 1px solid rgba(255,255,255,.06);
+    margin-top: 40px;
+  }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <h1>Graph Algorithms Visualized</h1>
+  <p>Explore the top 5 graph algorithms with interactive node-edge animations</p>
+</section>
+
+<nav class="nav-pills">
+  <a href="/">Home</a>
+  <a href="/sorting.html">Sorting Algorithms</a>
+  <a href="#bfs">BFS</a>
+  <a href="#dfs">DFS</a>
+  <a href="#dijkstra">Dijkstra</a>
+  <a href="#prim">Prim's MST</a>
+  <a href="#astar">A* Search</a>
+</nav>
+
+<!-- 1. BFS -->
+<section class="algo-section" id="bfs">
+<div class="algo-card bfs">
+  <div class="algo-header">
+    <div class="algo-number">1</div>
+    <div class="algo-title">Breadth-First Search</div>
+  </div>
+  <p class="algo-desc">Explores a graph level by level, visiting all neighbors of the current node before moving deeper. Uses a queue (FIFO) to determine traversal order. Guarantees the shortest path in unweighted graphs.</p>
+  <div class="complexity">
+    <span class="badge"><span class="label">Time</span> O(V + E)</span>
+    <span class="badge"><span class="label">Space</span> O(V)</span>
+  </div>
+  <div class="viz-area">
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch" style="background:#ff6584"></span>Current</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#a78bfa"></span>Queued</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#06b6d4"></span>Visited</span>
+    </div>
+    <svg class="viz-svg" id="svg-bfs"></svg>
+  </div>
+  <div class="controls">
+    <button class="btn btn-primary" onclick="startAlgo('bfs')">&#9654; Traverse</button>
+    <button class="btn btn-secondary" onclick="resetAlgo('bfs')">&#8635; Reset</button>
+    <div class="speed-control"><span>Speed</span><input type="range" min="1" max="10" value="5" id="speed-bfs"></div>
+  </div>
+  <div class="status-text" id="status-bfs">Press Traverse to begin</div>
+  <div class="steps">
+    <div class="step"><div class="step-num">Step 1</div><p>Add start node to queue and mark visited</p></div>
+    <div class="step"><div class="step-num">Step 2</div><p>Dequeue front node and process it</p></div>
+    <div class="step"><div class="step-num">Step 3</div><p>Enqueue all unvisited neighbors</p></div>
+    <div class="step"><div class="step-num">Step 4</div><p>Repeat until queue is empty</p></div>
+  </div>
+</div>
+</section>
+
+<!-- 2. DFS -->
+<section class="algo-section" id="dfs">
+<div class="algo-card dfs">
+  <div class="algo-header">
+    <div class="algo-number">2</div>
+    <div class="algo-title">Depth-First Search</div>
+  </div>
+  <p class="algo-desc">Explores as far as possible along each branch before backtracking. Uses a stack (LIFO) or recursion to track which node to visit next. Useful for topological sorting, cycle detection, and maze solving.</p>
+  <div class="complexity">
+    <span class="badge"><span class="label">Time</span> O(V + E)</span>
+    <span class="badge"><span class="label">Space</span> O(V)</span>
+  </div>
+  <div class="viz-area">
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch" style="background:#ff6584"></span>Current</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#fb923c"></span>On Stack</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#06b6d4"></span>Visited</span>
+    </div>
+    <svg class="viz-svg" id="svg-dfs"></svg>
+  </div>
+  <div class="controls">
+    <button class="btn btn-primary" onclick="startAlgo('dfs')">&#9654; Traverse</button>
+    <button class="btn btn-secondary" onclick="resetAlgo('dfs')">&#8635; Reset</button>
+    <div class="speed-control"><span>Speed</span><input type="range" min="1" max="10" value="5" id="speed-dfs"></div>
+  </div>
+  <div class="status-text" id="status-dfs">Press Traverse to begin</div>
+  <div class="steps">
+    <div class="step"><div class="step-num">Step 1</div><p>Push start node onto stack</p></div>
+    <div class="step"><div class="step-num">Step 2</div><p>Pop top node, mark visited</p></div>
+    <div class="step"><div class="step-num">Step 3</div><p>Push all unvisited neighbors</p></div>
+    <div class="step"><div class="step-num">Step 4</div><p>Backtrack when no unvisited neighbors remain</p></div>
+  </div>
+</div>
+</section>
+
+<!-- 3. DIJKSTRA -->
+<section class="algo-section" id="dijkstra">
+<div class="algo-card dijkstra">
+  <div class="algo-header">
+    <div class="algo-number">3</div>
+    <div class="algo-title">Dijkstra's Shortest Path</div>
+  </div>
+  <p class="algo-desc">Finds the shortest path from a source to all other nodes in a weighted graph with non-negative edge weights. Uses a priority queue to always explore the closest unvisited node next.</p>
+  <div class="complexity">
+    <span class="badge"><span class="label">Time</span> O((V+E) log V)</span>
+    <span class="badge"><span class="label">Space</span> O(V)</span>
+  </div>
+  <div class="viz-area">
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch" style="background:#ff6584"></span>Current</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#ffca28"></span>Relaxing</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#43e97b"></span>Finalized</span>
+    </div>
+    <svg class="viz-svg" id="svg-dijkstra"></svg>
+  </div>
+  <div class="controls">
+    <button class="btn btn-primary" onclick="startAlgo('dijkstra')">&#9654; Find Paths</button>
+    <button class="btn btn-secondary" onclick="resetAlgo('dijkstra')">&#8635; Reset</button>
+    <div class="speed-control"><span>Speed</span><input type="range" min="1" max="10" value="5" id="speed-dijkstra"></div>
+  </div>
+  <div class="status-text" id="status-dijkstra">Press Find Paths to begin from node A</div>
+  <div class="steps">
+    <div class="step"><div class="step-num">Step 1</div><p>Set source distance to 0, all others to infinity</p></div>
+    <div class="step"><div class="step-num">Step 2</div><p>Pick unvisited node with smallest distance</p></div>
+    <div class="step"><div class="step-num">Step 3</div><p>Update distances of its neighbors (relax edges)</p></div>
+    <div class="step"><div class="step-num">Step 4</div><p>Mark node as finalized, repeat until all visited</p></div>
+  </div>
+</div>
+</section>
+
+<!-- 4. PRIM'S MST -->
+<section class="algo-section" id="prim">
+<div class="algo-card prim">
+  <div class="algo-header">
+    <div class="algo-number">4</div>
+    <div class="algo-title">Prim's Minimum Spanning Tree</div>
+  </div>
+  <p class="algo-desc">Builds a minimum spanning tree by starting from any node and greedily adding the cheapest edge connecting a new node to the growing tree. Produces a tree connecting all nodes with minimum total weight.</p>
+  <div class="complexity">
+    <span class="badge"><span class="label">Time</span> O((V+E) log V)</span>
+    <span class="badge"><span class="label">Space</span> O(V)</span>
+  </div>
+  <div class="viz-area">
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch" style="background:#ff6584"></span>Current</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#ffca28"></span>Candidate</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#43e97b"></span>In Tree</span>
+    </div>
+    <svg class="viz-svg" id="svg-prim"></svg>
+  </div>
+  <div class="controls">
+    <button class="btn btn-primary" onclick="startAlgo('prim')">&#9654; Build MST</button>
+    <button class="btn btn-secondary" onclick="resetAlgo('prim')">&#8635; Reset</button>
+    <div class="speed-control"><span>Speed</span><input type="range" min="1" max="10" value="5" id="speed-prim"></div>
+  </div>
+  <div class="status-text" id="status-prim">Press Build MST to begin from node A</div>
+  <div class="steps">
+    <div class="step"><div class="step-num">Step 1</div><p>Start from any node, add to tree</p></div>
+    <div class="step"><div class="step-num">Step 2</div><p>Find cheapest edge from tree to non-tree node</p></div>
+    <div class="step"><div class="step-num">Step 3</div><p>Add that edge and node to tree</p></div>
+    <div class="step"><div class="step-num">Step 4</div><p>Repeat until all nodes are in tree</p></div>
+  </div>
+</div>
+</section>
+
+<!-- 5. A* SEARCH -->
+<section class="algo-section" id="astar">
+<div class="algo-card astar">
+  <div class="algo-header">
+    <div class="algo-number">5</div>
+    <div class="algo-title">A* Search</div>
+  </div>
+  <p class="algo-desc">An informed search algorithm that uses a heuristic to guide pathfinding. Combines Dijkstra's guarantee of shortest path with greedy best-first search's speed. Widely used in games and robotics.</p>
+  <div class="complexity">
+    <span class="badge"><span class="label">Time</span> O(E)</span>
+    <span class="badge"><span class="label">Space</span> O(V)</span>
+  </div>
+  <div class="viz-area">
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch" style="background:#43e97b"></span>Start</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#ff6584"></span>End</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#1e293b"></span>Wall</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#ffca28"></span>Open Set</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#06b6d4"></span>Closed Set</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#a78bfa"></span>Path</span>
+    </div>
+    <svg class="viz-svg" id="svg-astar" style="height:320px"></svg>
+  </div>
+  <div class="controls">
+    <button class="btn btn-primary" onclick="startAlgo('astar')">&#9654; Find Path</button>
+    <button class="btn btn-secondary" onclick="resetAlgo('astar')">&#8635; Reset</button>
+    <button class="btn btn-secondary" onclick="randomMaze()">Maze</button>
+    <button class="btn btn-secondary" onclick="clearWalls()">Clear Walls</button>
+    <div class="speed-control"><span>Speed</span><input type="range" min="1" max="10" value="5" id="speed-astar"></div>
+  </div>
+  <div class="status-text" id="status-astar">Click cells to place walls, then press Find Path</div>
+  <div class="steps">
+    <div class="step"><div class="step-num">Step 1</div><p>Add start to open set with f = g + h</p></div>
+    <div class="step"><div class="step-num">Step 2</div><p>Pick node with lowest f-score from open set</p></div>
+    <div class="step"><div class="step-num">Step 3</div><p>Explore neighbors, update g-scores, compute h (Manhattan)</p></div>
+    <div class="step"><div class="step-num">Step 4</div><p>Reconstruct path when end node is reached</p></div>
+  </div>
+</div>
+</section>
+
+<footer class="footer">
+  Graph Algorithms Visual Guide &mdash; All animations run entirely in-browser with SVG + JavaScript
+</footer>
+
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+
+// ===== GRAPH DATA =====
+const UNWEIGHTED_GRAPH = {
+  nodes: [
+    { id: 'A', x: 80,  y: 140 },
+    { id: 'B', x: 200, y: 50  },
+    { id: 'C', x: 200, y: 230 },
+    { id: 'D', x: 370, y: 80  },
+    { id: 'E', x: 370, y: 210 },
+    { id: 'F', x: 520, y: 50  },
+    { id: 'G', x: 520, y: 230 },
+    { id: 'H', x: 660, y: 140 },
+  ],
+  edges: [
+    ['A','B'], ['A','C'], ['B','D'], ['B','F'],
+    ['C','D'], ['C','E'], ['D','F'], ['D','G'],
+    ['E','G'], ['F','H'], ['G','H'],
+  ]
+};
+
+const WEIGHTED_GRAPH = {
+  nodes: [
+    { id: 'A', x: 80,  y: 140 },
+    { id: 'B', x: 200, y: 50  },
+    { id: 'C', x: 200, y: 230 },
+    { id: 'D', x: 370, y: 80  },
+    { id: 'E', x: 370, y: 210 },
+    { id: 'F', x: 520, y: 50  },
+    { id: 'G', x: 520, y: 230 },
+    { id: 'H', x: 660, y: 140 },
+  ],
+  edges: [
+    { from: 'A', to: 'B', w: 4 },
+    { from: 'A', to: 'C', w: 2 },
+    { from: 'B', to: 'D', w: 5 },
+    { from: 'B', to: 'F', w: 12 },
+    { from: 'C', to: 'D', w: 8 },
+    { from: 'C', to: 'E', w: 3 },
+    { from: 'D', to: 'F', w: 2 },
+    { from: 'D', to: 'G', w: 7 },
+    { from: 'E', to: 'G', w: 6 },
+    { from: 'F', to: 'H', w: 3 },
+    { from: 'G', to: 'H', w: 4 },
+  ]
+};
+
+// ===== A* GRID =====
+const GRID_ROWS = 12;
+const GRID_COLS = 20;
+const START = { r: 1, c: 1 };
+const END = { r: GRID_ROWS - 2, c: GRID_COLS - 2 };
+
+// ===== STATE =====
+const state = {};
+let astarGrid = [];
+let isDrawing = false;
+
+function buildAdjList(graph) {
+  const adj = {};
+  graph.nodes.forEach(n => adj[n.id] = []);
+  graph.edges.forEach(e => {
+    const [a, b] = Array.isArray(e) ? e : [e.from, e.to];
+    const w = e.w || 1;
+    adj[a].push({ node: b, weight: w });
+    adj[b].push({ node: a, weight: w });
+  });
+  return adj;
+}
+
+// ===== DRAWING: NODE-EDGE GRAPH =====
+function drawGraph(name, graphData, nodeColors = {}, edgeColors = {}, nodeLabels = {}) {
+  const svg = document.getElementById(`svg-${name}`);
+  svg.innerHTML = '';
+  const w = svg.clientWidth || 750;
+  const h = svg.clientHeight || 300;
+  const scaleX = w / 750;
+  const scaleY = h / 300;
+  const isWeighted = !Array.isArray(graphData.edges[0]);
+
+  // Draw edges
+  graphData.edges.forEach((e, idx) => {
+    const [a, b] = isWeighted ? [e.from, e.to] : e;
+    const nA = graphData.nodes.find(n => n.id === a);
+    const nB = graphData.nodes.find(n => n.id === b);
+    const edgeKey = `${a}-${b}`;
+    const edgeKeyRev = `${b}-${a}`;
+    const color = edgeColors[edgeKey] || edgeColors[edgeKeyRev] || '#3a3f5c';
+    const isHighlighted = color !== '#3a3f5c';
+
+    const line = document.createElementNS(NS, 'line');
+    line.setAttribute('x1', nA.x * scaleX);
+    line.setAttribute('y1', nA.y * scaleY);
+    line.setAttribute('x2', nB.x * scaleX);
+    line.setAttribute('y2', nB.y * scaleY);
+    line.setAttribute('stroke', color);
+    line.setAttribute('stroke-width', isHighlighted ? 3 : 2);
+    line.style.transition = 'all 0.2s ease';
+    svg.appendChild(line);
+
+    // Weight label for weighted graphs
+    if (isWeighted) {
+      const mx = (nA.x + nB.x) / 2 * scaleX;
+      const my = (nA.y + nB.y) / 2 * scaleY;
+      const dx = nB.x - nA.x;
+      const dy = nB.y - nA.y;
+      const len = Math.sqrt(dx*dx + dy*dy) || 1;
+      const ox = (-dy / len) * 14;
+      const oy = (dx / len) * 14;
+
+      const text = document.createElementNS(NS, 'text');
+      text.setAttribute('x', mx + ox);
+      text.setAttribute('y', my + oy);
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('dominant-baseline', 'middle');
+      text.setAttribute('fill', isHighlighted ? '#fff' : '#5a5f7a');
+      text.setAttribute('font-size', '12');
+      text.setAttribute('font-weight', '600');
+      text.setAttribute('font-family', 'system-ui, sans-serif');
+      text.textContent = e.w;
+      svg.appendChild(text);
+    }
+  });
+
+  // Draw nodes
+  graphData.nodes.forEach(n => {
+    const cx = n.x * scaleX;
+    const cy = n.y * scaleY;
+    const r = 22 * Math.min(scaleX, scaleY);
+    const color = nodeColors[n.id] || '#2a2f4a';
+    const isActive = color !== '#2a2f4a';
+
+    const circle = document.createElementNS(NS, 'circle');
+    circle.setAttribute('cx', cx);
+    circle.setAttribute('cy', cy);
+    circle.setAttribute('r', r);
+    circle.setAttribute('fill', color);
+    circle.setAttribute('stroke', isActive ? '#fff' : '#4a4f6a');
+    circle.setAttribute('stroke-width', isActive ? 2.5 : 1.5);
+    circle.style.transition = 'all 0.2s ease';
+    svg.appendChild(circle);
+
+    // Node label
+    const text = document.createElementNS(NS, 'text');
+    text.setAttribute('x', cx);
+    text.setAttribute('y', cy);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('dominant-baseline', 'central');
+    text.setAttribute('fill', '#fff');
+    text.setAttribute('font-size', '14');
+    text.setAttribute('font-weight', '700');
+    text.setAttribute('font-family', 'system-ui, sans-serif');
+    text.textContent = n.id;
+    svg.appendChild(text);
+
+    // Distance label (for Dijkstra/Prim)
+    if (nodeLabels[n.id] !== undefined) {
+      const lbl = document.createElementNS(NS, 'text');
+      lbl.setAttribute('x', cx);
+      lbl.setAttribute('y', cy + r + 16);
+      lbl.setAttribute('text-anchor', 'middle');
+      lbl.setAttribute('fill', isActive ? '#fff' : '#7a7f9a');
+      lbl.setAttribute('font-size', '11');
+      lbl.setAttribute('font-weight', '600');
+      lbl.setAttribute('font-family', 'system-ui, sans-serif');
+      lbl.textContent = nodeLabels[n.id];
+      svg.appendChild(lbl);
+    }
+  });
+}
+
+// ===== DRAWING: A* GRID =====
+function initGrid() {
+  astarGrid = [];
+  for (let r = 0; r < GRID_ROWS; r++) {
+    astarGrid[r] = [];
+    for (let c = 0; c < GRID_COLS; c++) {
+      astarGrid[r][c] = 0; // 0=empty, 1=wall
+    }
+  }
+}
+
+function drawGridSVG(cellColors = {}) {
+  const svg = document.getElementById('svg-astar');
+  svg.innerHTML = '';
+  const w = svg.clientWidth || 750;
+  const h = svg.clientHeight || 320;
+  const cellW = w / GRID_COLS;
+  const cellH = h / GRID_ROWS;
+  const gap = 1;
+
+  for (let r = 0; r < GRID_ROWS; r++) {
+    for (let c = 0; c < GRID_COLS; c++) {
+      const key = `${r}-${c}`;
+      let fill;
+      if (r === START.r && c === START.c) fill = '#43e97b';
+      else if (r === END.r && c === END.c) fill = '#ff6584';
+      else if (cellColors[key]) fill = cellColors[key];
+      else if (astarGrid[r][c] === 1) fill = '#1e293b';
+      else fill = '#1f2337';
+
+      const rect = document.createElementNS(NS, 'rect');
+      rect.setAttribute('x', c * cellW + gap);
+      rect.setAttribute('y', r * cellH + gap);
+      rect.setAttribute('width', cellW - gap * 2);
+      rect.setAttribute('height', cellH - gap * 2);
+      rect.setAttribute('rx', 3);
+      rect.setAttribute('fill', fill);
+      rect.setAttribute('data-r', r);
+      rect.setAttribute('data-c', c);
+      rect.style.cursor = 'pointer';
+      rect.style.transition = 'fill 0.1s ease';
+      svg.appendChild(rect);
+    }
+  }
+}
+
+function setupGridInteraction() {
+  const svg = document.getElementById('svg-astar');
+  svg.addEventListener('mousedown', (e) => {
+    if (state.astar && state.astar.running) return;
+    isDrawing = true;
+    toggleWall(e);
+  });
+  svg.addEventListener('mousemove', (e) => {
+    if (!isDrawing) return;
+    toggleWall(e);
+  });
+  svg.addEventListener('mouseup', () => { isDrawing = false; });
+  svg.addEventListener('mouseleave', () => { isDrawing = false; });
+}
+
+function toggleWall(e) {
+  const target = e.target;
+  const r = parseInt(target.getAttribute('data-r'));
+  const c = parseInt(target.getAttribute('data-c'));
+  if (isNaN(r) || isNaN(c)) return;
+  if (r === START.r && c === START.c) return;
+  if (r === END.r && c === END.c) return;
+  astarGrid[r][c] = astarGrid[r][c] === 1 ? 0 : 1;
+  drawGridSVG();
+}
+
+function randomMaze() {
+  if (state.astar && state.astar.running) return;
+  initGrid();
+  for (let r = 0; r < GRID_ROWS; r++) {
+    for (let c = 0; c < GRID_COLS; c++) {
+      if (r === START.r && c === START.c) continue;
+      if (r === END.r && c === END.c) continue;
+      if (Math.random() < 0.28) astarGrid[r][c] = 1;
+    }
+  }
+  drawGridSVG();
+  setStatus('astar', 'Maze generated. Press Find Path to begin');
+}
+
+function clearWalls() {
+  if (state.astar && state.astar.running) return;
+  initGrid();
+  drawGridSVG();
+  setStatus('astar', 'Walls cleared. Click cells to place walls');
+}
+
+// ===== UTILITY =====
+function getDelay(name) {
+  const slider = document.getElementById(`speed-${name}`);
+  const speed = slider ? parseInt(slider.value) : 5;
+  return Math.max(30, 600 - speed * 55);
+}
+
+function setStatus(name, msg) {
+  document.getElementById(`status-${name}`).textContent = msg;
+}
+
+function sleep(name) {
+  return new Promise(r => setTimeout(r, getDelay(name)));
+}
+
+function resetAlgo(name) {
+  if (state[name]) {
+    state[name].cancelled = true;
+    state[name].running = false;
+  }
+  if (name === 'bfs' || name === 'dfs') {
+    drawGraph(name, UNWEIGHTED_GRAPH);
+  } else if (name === 'dijkstra' || name === 'prim') {
+    drawGraph(name, WEIGHTED_GRAPH);
+  } else if (name === 'astar') {
+    initGrid();
+    drawGridSVG();
+  }
+  const defaults = {
+    bfs: 'Press Traverse to begin',
+    dfs: 'Press Traverse to begin',
+    dijkstra: 'Press Find Paths to begin from node A',
+    prim: 'Press Build MST to begin from node A',
+    astar: 'Click cells to place walls, then press Find Path',
+  };
+  setStatus(name, defaults[name]);
+}
+
+async function startAlgo(name) {
+  if (state[name] && state[name].running) return;
+  state[name] = { running: true, cancelled: false };
+
+  switch (name) {
+    case 'bfs': await bfsTraversal(name); break;
+    case 'dfs': await dfsTraversal(name); break;
+    case 'dijkstra': await dijkstraAlgo(name); break;
+    case 'prim': await primMST(name); break;
+    case 'astar': await astarSearch(name); break;
+  }
+
+  if (state[name] && !state[name].cancelled) {
+    state[name].running = false;
+  }
+}
+
+// ===== BFS =====
+async function bfsTraversal(name) {
+  const adj = buildAdjList(UNWEIGHTED_GRAPH);
+  const visited = new Set();
+  const queue = ['A'];
+  visited.add('A');
+  const nodeColors = { A: '#a78bfa' };
+  const edgeColors = {};
+
+  drawGraph(name, UNWEIGHTED_GRAPH, nodeColors, edgeColors);
+  setStatus(name, 'Starting BFS from node A');
+  await sleep(name);
+
+  while (queue.length > 0) {
+    if (state[name].cancelled) return;
+
+    const current = queue.shift();
+    nodeColors[current] = '#ff6584';
+    drawGraph(name, UNWEIGHTED_GRAPH, nodeColors, edgeColors);
+    setStatus(name, `Processing node ${current} | Queue: [${queue.join(', ')}]`);
+    await sleep(name);
+
+    for (const { node: neighbor } of adj[current]) {
+      if (state[name].cancelled) return;
+      if (!visited.has(neighbor)) {
+        visited.add(neighbor);
+        queue.push(neighbor);
+        nodeColors[neighbor] = '#a78bfa';
+        edgeColors[`${current}-${neighbor}`] = '#ffca28';
+        drawGraph(name, UNWEIGHTED_GRAPH, nodeColors, edgeColors);
+        setStatus(name, `Discovered ${neighbor} from ${current} | Queue: [${queue.join(', ')}]`);
+        await sleep(name);
+      }
+    }
+
+    nodeColors[current] = '#06b6d4';
+    edgeColors[`${current}-*`] = undefined;
+    drawGraph(name, UNWEIGHTED_GRAPH, nodeColors, edgeColors);
+    await sleep(name);
+  }
+
+  // Final: all visited
+  UNWEIGHTED_GRAPH.nodes.forEach(n => nodeColors[n.id] = '#06b6d4');
+  drawGraph(name, UNWEIGHTED_GRAPH, nodeColors, edgeColors);
+  setStatus(name, 'BFS complete — all nodes visited!');
+}
+
+// ===== DFS =====
+async function dfsTraversal(name) {
+  const adj = buildAdjList(UNWEIGHTED_GRAPH);
+  const visited = new Set();
+  const stack = ['A'];
+  const nodeColors = { A: '#fb923c' };
+  const edgeColors = {};
+
+  drawGraph(name, UNWEIGHTED_GRAPH, nodeColors, edgeColors);
+  setStatus(name, 'Starting DFS from node A');
+  await sleep(name);
+
+  while (stack.length > 0) {
+    if (state[name].cancelled) return;
+
+    const current = stack.pop();
+    if (visited.has(current)) continue;
+    visited.add(current);
+
+    nodeColors[current] = '#ff6584';
+    drawGraph(name, UNWEIGHTED_GRAPH, nodeColors, edgeColors);
+    setStatus(name, `Visiting node ${current} | Stack: [${stack.join(', ')}]`);
+    await sleep(name);
+
+    const neighbors = adj[current].map(e => e.node).reverse();
+    for (const neighbor of neighbors) {
+      if (state[name].cancelled) return;
+      if (!visited.has(neighbor)) {
+        stack.push(neighbor);
+        nodeColors[neighbor] = '#fb923c';
+        edgeColors[`${current}-${neighbor}`] = '#ffca28';
+        drawGraph(name, UNWEIGHTED_GRAPH, nodeColors, edgeColors);
+        setStatus(name, `Pushed ${neighbor} to stack from ${current}`);
+        await sleep(name);
+      }
+    }
+
+    nodeColors[current] = '#06b6d4';
+    drawGraph(name, UNWEIGHTED_GRAPH, nodeColors, edgeColors);
+    await sleep(name);
+  }
+
+  UNWEIGHTED_GRAPH.nodes.forEach(n => nodeColors[n.id] = '#06b6d4');
+  drawGraph(name, UNWEIGHTED_GRAPH, nodeColors, edgeColors);
+  setStatus(name, 'DFS complete — all nodes visited!');
+}
+
+// ===== DIJKSTRA =====
+async function dijkstraAlgo(name) {
+  const adj = buildAdjList(WEIGHTED_GRAPH);
+  const dist = {};
+  const prev = {};
+  const visited = new Set();
+  const nodeColors = {};
+  const edgeColors = {};
+  const nodeLabels = {};
+
+  WEIGHTED_GRAPH.nodes.forEach(n => {
+    dist[n.id] = Infinity;
+    prev[n.id] = null;
+    nodeLabels[n.id] = '\u221e';
+  });
+  dist['A'] = 0;
+  nodeLabels['A'] = '0';
+
+  drawGraph(name, WEIGHTED_GRAPH, nodeColors, edgeColors, nodeLabels);
+  setStatus(name, 'Initializing distances: source A = 0, all others = \u221e');
+  await sleep(name);
+
+  for (let i = 0; i < WEIGHTED_GRAPH.nodes.length; i++) {
+    if (state[name].cancelled) return;
+
+    // Find unvisited node with min distance
+    let minDist = Infinity, u = null;
+    for (const n of WEIGHTED_GRAPH.nodes) {
+      if (!visited.has(n.id) && dist[n.id] < minDist) {
+        minDist = dist[n.id];
+        u = n.id;
+      }
+    }
+    if (u === null) break;
+
+    nodeColors[u] = '#ff6584';
+    drawGraph(name, WEIGHTED_GRAPH, nodeColors, edgeColors, nodeLabels);
+    setStatus(name, `Processing node ${u} (distance = ${dist[u]})`);
+    await sleep(name);
+
+    // Relax neighbors
+    for (const { node: v, weight: w } of adj[u]) {
+      if (state[name].cancelled) return;
+      if (visited.has(v)) continue;
+
+      const newDist = dist[u] + w;
+      edgeColors[`${u}-${v}`] = '#ffca28';
+      nodeColors[v] = '#ffca28';
+      drawGraph(name, WEIGHTED_GRAPH, nodeColors, edgeColors, nodeLabels);
+      setStatus(name, `Relaxing edge ${u}\u2192${v}: ${dist[u]} + ${w} = ${newDist} ${newDist < dist[v] ? '< ' + (dist[v] === Infinity ? '\u221e' : dist[v]) + ' \u2014 update!' : '\u2265 ' + dist[v] + ' \u2014 skip'}`);
+      await sleep(name);
+
+      if (newDist < dist[v]) {
+        dist[v] = newDist;
+        prev[v] = u;
+        nodeLabels[v] = String(newDist);
+      }
+
+      if (!visited.has(v)) nodeColors[v] = '#2a2f4a';
+      edgeColors[`${u}-${v}`] = '#3a3f5c';
+    }
+
+    visited.add(u);
+    nodeColors[u] = '#43e97b';
+    drawGraph(name, WEIGHTED_GRAPH, nodeColors, edgeColors, nodeLabels);
+    await sleep(name);
+  }
+
+  // Highlight shortest path tree
+  for (const n of WEIGHTED_GRAPH.nodes) {
+    if (prev[n.id]) {
+      edgeColors[`${prev[n.id]}-${n.id}`] = '#43e97b';
+    }
+  }
+  drawGraph(name, WEIGHTED_GRAPH, nodeColors, edgeColors, nodeLabels);
+  setStatus(name, 'Dijkstra complete — shortest distances from A found!');
+}
+
+// ===== PRIM'S MST =====
+async function primMST(name) {
+  const adj = buildAdjList(WEIGHTED_GRAPH);
+  const inTree = new Set();
+  const mstEdges = [];
+  const nodeColors = {};
+  const edgeColors = {};
+  let totalWeight = 0;
+
+  inTree.add('A');
+  nodeColors['A'] = '#43e97b';
+  drawGraph(name, WEIGHTED_GRAPH, nodeColors, edgeColors);
+  setStatus(name, 'Starting Prim\'s from node A');
+  await sleep(name);
+
+  while (inTree.size < WEIGHTED_GRAPH.nodes.length) {
+    if (state[name].cancelled) return;
+
+    // Find cheapest edge from tree to non-tree
+    let bestEdge = null, bestW = Infinity, bestFrom = null, bestTo = null;
+    for (const u of inTree) {
+      for (const { node: v, weight: w } of adj[u]) {
+        if (!inTree.has(v) && w < bestW) {
+          bestW = w;
+          bestFrom = u;
+          bestTo = v;
+        }
+      }
+    }
+
+    if (!bestTo) break;
+
+    // Highlight candidate edges
+    for (const u of inTree) {
+      for (const { node: v, weight: w } of adj[u]) {
+        if (!inTree.has(v)) {
+          edgeColors[`${u}-${v}`] = '#ffca28';
+          nodeColors[v] = '#ffca28';
+        }
+      }
+    }
+    nodeColors[bestTo] = '#ff6584';
+    edgeColors[`${bestFrom}-${bestTo}`] = '#ff6584';
+    drawGraph(name, WEIGHTED_GRAPH, nodeColors, edgeColors);
+    setStatus(name, `Cheapest edge: ${bestFrom}\u2192${bestTo} (weight ${bestW})`);
+    await sleep(name);
+
+    // Add to tree
+    inTree.add(bestTo);
+    mstEdges.push([bestFrom, bestTo]);
+    totalWeight += bestW;
+
+    // Reset colors
+    WEIGHTED_GRAPH.nodes.forEach(n => {
+      nodeColors[n.id] = inTree.has(n.id) ? '#43e97b' : '#2a2f4a';
+    });
+    // Reset edge colors
+    Object.keys(edgeColors).forEach(k => delete edgeColors[k]);
+    mstEdges.forEach(([a, b]) => {
+      edgeColors[`${a}-${b}`] = '#43e97b';
+    });
+
+    drawGraph(name, WEIGHTED_GRAPH, nodeColors, edgeColors);
+    setStatus(name, `Added ${bestTo} to MST | Total weight: ${totalWeight}`);
+    await sleep(name);
+  }
+
+  setStatus(name, `Prim's complete — MST total weight: ${totalWeight}`);
+}
+
+// ===== A* SEARCH =====
+async function astarSearch(name) {
+  const openSet = [];
+  const closedSet = new Set();
+  const gScore = {};
+  const fScore = {};
+  const cameFrom = {};
+  const cellColors = {};
+
+  const key = (r, c) => `${r}-${c}`;
+  const heuristic = (r, c) => Math.abs(r - END.r) + Math.abs(c - END.c);
+
+  gScore[key(START.r, START.c)] = 0;
+  fScore[key(START.r, START.c)] = heuristic(START.r, START.c);
+  openSet.push({ r: START.r, c: START.c, f: fScore[key(START.r, START.c)] });
+
+  setStatus(name, 'Starting A* search...');
+
+  while (openSet.length > 0) {
+    if (state[name].cancelled) return;
+
+    // Get node with lowest fScore
+    openSet.sort((a, b) => a.f - b.f);
+    const current = openSet.shift();
+    const ck = key(current.r, current.c);
+
+    if (current.r === END.r && current.c === END.c) {
+      // Reconstruct path
+      let pathKey = ck;
+      while (pathKey && pathKey !== key(START.r, START.c)) {
+        cellColors[pathKey] = '#a78bfa';
+        pathKey = cameFrom[pathKey];
+      }
+      drawGridSVG(cellColors);
+      setStatus(name, 'Path found!');
+      return;
+    }
+
+    closedSet.add(ck);
+    cellColors[ck] = '#06b6d4';
+    drawGridSVG(cellColors);
+    setStatus(name, `Exploring (${current.r}, ${current.c}) | Open: ${openSet.length} | Closed: ${closedSet.size}`);
+    await sleep(name);
+
+    // Neighbors (4-directional)
+    const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+    for (const [dr, dc] of dirs) {
+      const nr = current.r + dr;
+      const nc = current.c + dc;
+      const nk = key(nr, nc);
+
+      if (nr < 0 || nr >= GRID_ROWS || nc < 0 || nc >= GRID_COLS) continue;
+      if (astarGrid[nr][nc] === 1) continue;
+      if (closedSet.has(nk)) continue;
+
+      const tentG = (gScore[ck] || 0) + 1;
+      if (tentG < (gScore[nk] ?? Infinity)) {
+        cameFrom[nk] = ck;
+        gScore[nk] = tentG;
+        fScore[nk] = tentG + heuristic(nr, nc);
+
+        if (!openSet.find(n => n.r === nr && n.c === nc)) {
+          openSet.push({ r: nr, c: nc, f: fScore[nk] });
+          cellColors[nk] = '#ffca28';
+        }
+      }
+    }
+
+    drawGridSVG(cellColors);
+    await sleep(name);
+  }
+
+  setStatus(name, 'No path found — try removing some walls');
+}
+
+// ===== INIT =====
+function init() {
+  drawGraph('bfs', UNWEIGHTED_GRAPH);
+  drawGraph('dfs', UNWEIGHTED_GRAPH);
+  drawGraph('dijkstra', WEIGHTED_GRAPH);
+  drawGraph('prim', WEIGHTED_GRAPH);
+  initGrid();
+  drawGridSVG();
+  setupGridInteraction();
+}
+
+init();
+
+window.addEventListener('resize', () => {
+  ['bfs', 'dfs'].forEach(name => {
+    if (!state[name] || !state[name].running) drawGraph(name, UNWEIGHTED_GRAPH);
+  });
+  ['dijkstra', 'prim'].forEach(name => {
+    if (!state[name] || !state[name].running) drawGraph(name, WEIGHTED_GRAPH);
+  });
+  if (!state.astar || !state.astar.running) drawGridSVG();
+});
+</script>
+
+</body>
+</html>
