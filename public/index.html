@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Top 5 Sorting Algorithms — Visual Guide</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d2e;
+    --accent: #6c63ff;
+    --accent2: #ff6584;
+    --accent3: #43e97b;
+    --text: #e2e4f0;
+    --muted: #7a7f9a;
+    --compare: #ffca28;
+    --swap: #ff6584;
+    --sorted: #43e97b;
+    --default: #6c63ff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* Hero */
+  .hero {
+    text-align: center;
+    padding: 60px 20px 30px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at 50% 80%, rgba(108,99,255,.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255,101,132,.1) 0%, transparent 40%);
+    animation: heroPulse 8s ease-in-out infinite alternate;
+  }
+  @keyframes heroPulse {
+    from { transform: scale(1) rotate(0deg); }
+    to { transform: scale(1.1) rotate(3deg); }
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    position: relative;
+    background: linear-gradient(135deg, #6c63ff, #ff6584, #43e97b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+  }
+  .hero p {
+    font-size: 1.1rem;
+    color: var(--muted);
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* Nav pills */
+  .nav-pills {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(15,17,23,.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(108,99,255,.15);
+  }
+  .nav-pills a {
+    text-decoration: none;
+    color: var(--muted);
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid rgba(255,255,255,.08);
+    transition: all .25s;
+  }
+  .nav-pills a:hover {
+    color: #fff;
+    border-color: var(--accent);
+    background: rgba(108,99,255,.15);
+  }
+
+  /* Section */
+  .algo-section {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+  .algo-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 35px;
+    border: 1px solid rgba(255,255,255,.06);
+    box-shadow: 0 8px 32px rgba(0,0,0,.3);
+    position: relative;
+    overflow: hidden;
+  }
+  .algo-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .algo-card.bubble::before { background: linear-gradient(90deg, #6c63ff, #a78bfa); }
+  .algo-card.selection::before { background: linear-gradient(90deg, #ff6584, #ff9a9e); }
+  .algo-card.insertion::before { background: linear-gradient(90deg, #43e97b, #38f9d7); }
+  .algo-card.merge::before { background: linear-gradient(90deg, #ffca28, #ff6f00); }
+  .algo-card.quick::before { background: linear-gradient(90deg, #00b4d8, #90e0ef); }
+
+  .algo-header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .algo-number {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  .bubble .algo-number { background: rgba(108,99,255,.2); color: #a78bfa; }
+  .selection .algo-number { background: rgba(255,101,132,.2); color: #ff9a9e; }
+  .insertion .algo-number { background: rgba(67,233,123,.2); color: #43e97b; }
+  .merge .algo-number { background: rgba(255,202,40,.2); color: #ffca28; }
+  .quick .algo-number { background: rgba(0,180,216,.2); color: #00b4d8; }
+
+  .algo-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+  }
+  .algo-desc {
+    color: var(--muted);
+    margin-bottom: 18px;
+    font-size: .95rem;
+  }
+
+  /* Complexity badges */
+  .complexity {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.08);
+  }
+  .badge .label { color: var(--muted); font-weight: 400; }
+
+  /* Visualization area */
+  .viz-area {
+    background: rgba(0,0,0,.25);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 18px;
+    min-height: 220px;
+    position: relative;
+  }
+  .viz-svg {
+    width: 100%;
+    height: 200px;
+    display: block;
+  }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .btn {
+    padding: 9px 22px;
+    border-radius: 10px;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: #5a52e0; transform: translateY(-1px); }
+  .btn-secondary {
+    background: rgba(255,255,255,.08);
+    color: var(--text);
+  }
+  .btn-secondary:hover { background: rgba(255,255,255,.14); }
+  .speed-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .speed-control input[type=range] {
+    width: 80px;
+    accent-color: var(--accent);
+  }
+  .status-text {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 10px;
+    min-height: 20px;
+  }
+
+  /* Steps explanation */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 20px;
+  }
+  .step {
+    padding: 14px;
+    background: rgba(255,255,255,.03);
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,.06);
+  }
+  .step-num {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .bubble .step-num { color: #a78bfa; }
+  .selection .step-num { color: #ff9a9e; }
+  .insertion .step-num { color: #43e97b; }
+  .merge .step-num { color: #ffca28; }
+  .quick .step-num { color: #00b4d8; }
+  .step p { font-size: 13px; color: var(--muted); }
+
+  /* Legend */
+  .legend {
+    display: flex; gap: 18px; flex-wrap: wrap;
+    margin-bottom: 12px; font-size: 13px; color: var(--muted);
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 6px;
+  }
+  .legend-swatch {
+    width: 14px; height: 14px; border-radius: 3px;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 13px;
+    border-top: 1px solid rgba(255,255,255,.06);
+    margin-top: 40px;
+  }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <h1>Sorting Algorithms Visualized</h1>
+  <p>Watch the top 5 sorting algorithms come to life with step-by-step animations</p>
+</section>
+
+<nav class="nav-pills">
+  <a href="#bubble">Bubble Sort</a>
+  <a href="#selection">Selection Sort</a>
+  <a href="#insertion">Insertion Sort</a>
+  <a href="#merge">Merge Sort</a>
+  <a href="#quick">Quick Sort</a>
+</nav>
+
+<!-- 1. BUBBLE SORT -->
+<section class="algo-section" id="bubble">
+<div class="algo-card bubble">
+  <div class="algo-header">
+    <div class="algo-number">1</div>
+    <div class="algo-title">Bubble Sort</div>
+  </div>
+  <p class="algo-desc">Repeatedly steps through the list, compares adjacent elements, and swaps them if they are in the wrong order. The largest unsorted element "bubbles up" to its correct position each pass.</p>
+  <div class="complexity">
+    <span class="badge"><span class="label">Best</span> O(n)</span>
+    <span class="badge"><span class="label">Avg</span> O(n&sup2;)</span>
+    <span class="badge"><span class="label">Worst</span> O(n&sup2;)</span>
+    <span class="badge"><span class="label">Space</span> O(1)</span>
+  </div>
+  <div class="viz-area">
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch" style="background:#ffca28"></span>Comparing</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#ff6584"></span>Swapping</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#43e97b"></span>Sorted</span>
+    </div>
+    <svg class="viz-svg" id="svg-bubble"></svg>
+  </div>
+  <div class="controls">
+    <button class="btn btn-primary" onclick="startSort('bubble')">&#9654; Sort</button>
+    <button class="btn btn-secondary" onclick="resetSort('bubble')">&#8635; Reset</button>
+    <div class="speed-control"><span>Speed</span><input type="range" min="1" max="10" value="5" id="speed-bubble"></div>
+  </div>
+  <div class="status-text" id="status-bubble">Press Sort to begin</div>
+  <div class="steps">
+    <div class="step"><div class="step-num">Step 1</div><p>Compare each pair of adjacent elements from left to right</p></div>
+    <div class="step"><div class="step-num">Step 2</div><p>If left > right, swap them</p></div>
+    <div class="step"><div class="step-num">Step 3</div><p>After each pass, the next largest element is in place</p></div>
+    <div class="step"><div class="step-num">Step 4</div><p>Repeat until no swaps are needed</p></div>
+  </div>
+</div>
+</section>
+
+<!-- 2. SELECTION SORT -->
+<section class="algo-section" id="selection">
+<div class="algo-card selection">
+  <div class="algo-header">
+    <div class="algo-number">2</div>
+    <div class="algo-title">Selection Sort</div>
+  </div>
+  <p class="algo-desc">Finds the minimum element in the unsorted portion and places it at the beginning. Divides the array into a sorted and unsorted region, growing the sorted region one element at a time.</p>
+  <div class="complexity">
+    <span class="badge"><span class="label">Best</span> O(n&sup2;)</span>
+    <span class="badge"><span class="label">Avg</span> O(n&sup2;)</span>
+    <span class="badge"><span class="label">Worst</span> O(n&sup2;)</span>
+    <span class="badge"><span class="label">Space</span> O(1)</span>
+  </div>
+  <div class="viz-area">
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch" style="background:#ffca28"></span>Current Min</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#ff6584"></span>Comparing</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#43e97b"></span>Sorted</span>
+    </div>
+    <svg class="viz-svg" id="svg-selection"></svg>
+  </div>
+  <div class="controls">
+    <button class="btn btn-primary" onclick="startSort('selection')">&#9654; Sort</button>
+    <button class="btn btn-secondary" onclick="resetSort('selection')">&#8635; Reset</button>
+    <div class="speed-control"><span>Speed</span><input type="range" min="1" max="10" value="5" id="speed-selection"></div>
+  </div>
+  <div class="status-text" id="status-selection">Press Sort to begin</div>
+  <div class="steps">
+    <div class="step"><div class="step-num">Step 1</div><p>Scan the unsorted portion to find the minimum element</p></div>
+    <div class="step"><div class="step-num">Step 2</div><p>Swap the minimum with the first unsorted element</p></div>
+    <div class="step"><div class="step-num">Step 3</div><p>Move the boundary of the sorted region one element right</p></div>
+    <div class="step"><div class="step-num">Step 4</div><p>Repeat until the entire array is sorted</p></div>
+  </div>
+</div>
+</section>
+
+<!-- 3. INSERTION SORT -->
+<section class="algo-section" id="insertion">
+<div class="algo-card insertion">
+  <div class="algo-header">
+    <div class="algo-number">3</div>
+    <div class="algo-title">Insertion Sort</div>
+  </div>
+  <p class="algo-desc">Builds the sorted array one element at a time by taking each element and inserting it into its correct position among the previously sorted elements — like sorting a hand of playing cards.</p>
+  <div class="complexity">
+    <span class="badge"><span class="label">Best</span> O(n)</span>
+    <span class="badge"><span class="label">Avg</span> O(n&sup2;)</span>
+    <span class="badge"><span class="label">Worst</span> O(n&sup2;)</span>
+    <span class="badge"><span class="label">Space</span> O(1)</span>
+  </div>
+  <div class="viz-area">
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch" style="background:#ffca28"></span>Key Element</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#ff6584"></span>Shifting</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#43e97b"></span>Sorted</span>
+    </div>
+    <svg class="viz-svg" id="svg-insertion"></svg>
+  </div>
+  <div class="controls">
+    <button class="btn btn-primary" onclick="startSort('insertion')">&#9654; Sort</button>
+    <button class="btn btn-secondary" onclick="resetSort('insertion')">&#8635; Reset</button>
+    <div class="speed-control"><span>Speed</span><input type="range" min="1" max="10" value="5" id="speed-insertion"></div>
+  </div>
+  <div class="status-text" id="status-insertion">Press Sort to begin</div>
+  <div class="steps">
+    <div class="step"><div class="step-num">Step 1</div><p>Take the next unsorted element as the "key"</p></div>
+    <div class="step"><div class="step-num">Step 2</div><p>Compare the key with sorted elements from right to left</p></div>
+    <div class="step"><div class="step-num">Step 3</div><p>Shift larger elements one position right to make room</p></div>
+    <div class="step"><div class="step-num">Step 4</div><p>Insert the key into its correct position</p></div>
+  </div>
+</div>
+</section>
+
+<!-- 4. MERGE SORT -->
+<section class="algo-section" id="merge">
+<div class="algo-card merge">
+  <div class="algo-header">
+    <div class="algo-number">4</div>
+    <div class="algo-title">Merge Sort</div>
+  </div>
+  <p class="algo-desc">A divide-and-conquer algorithm that splits the array in half, recursively sorts each half, then merges the sorted halves back together. Guarantees O(n log n) in all cases.</p>
+  <div class="complexity">
+    <span class="badge"><span class="label">Best</span> O(n log n)</span>
+    <span class="badge"><span class="label">Avg</span> O(n log n)</span>
+    <span class="badge"><span class="label">Worst</span> O(n log n)</span>
+    <span class="badge"><span class="label">Space</span> O(n)</span>
+  </div>
+  <div class="viz-area">
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch" style="background:#ffca28"></span>Merging</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#00b4d8"></span>Sub-array</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#43e97b"></span>Sorted</span>
+    </div>
+    <svg class="viz-svg" id="svg-merge"></svg>
+  </div>
+  <div class="controls">
+    <button class="btn btn-primary" onclick="startSort('merge')">&#9654; Sort</button>
+    <button class="btn btn-secondary" onclick="resetSort('merge')">&#8635; Reset</button>
+    <div class="speed-control"><span>Speed</span><input type="range" min="1" max="10" value="5" id="speed-merge"></div>
+  </div>
+  <div class="status-text" id="status-merge">Press Sort to begin</div>
+  <div class="steps">
+    <div class="step"><div class="step-num">Step 1</div><p>Divide the array into two halves recursively</p></div>
+    <div class="step"><div class="step-num">Step 2</div><p>Continue until each sub-array has one element</p></div>
+    <div class="step"><div class="step-num">Step 3</div><p>Merge pairs of sub-arrays in sorted order</p></div>
+    <div class="step"><div class="step-num">Step 4</div><p>Repeat merging up until the full array is sorted</p></div>
+  </div>
+</div>
+</section>
+
+<!-- 5. QUICK SORT -->
+<section class="algo-section" id="quick">
+<div class="algo-card quick">
+  <div class="algo-header">
+    <div class="algo-number">5</div>
+    <div class="algo-title">Quick Sort</div>
+  </div>
+  <p class="algo-desc">Picks a "pivot" element, partitions the array so elements smaller than the pivot go left and larger go right, then recursively sorts the partitions. The most widely used sorting algorithm in practice.</p>
+  <div class="complexity">
+    <span class="badge"><span class="label">Best</span> O(n log n)</span>
+    <span class="badge"><span class="label">Avg</span> O(n log n)</span>
+    <span class="badge"><span class="label">Worst</span> O(n&sup2;)</span>
+    <span class="badge"><span class="label">Space</span> O(log n)</span>
+  </div>
+  <div class="viz-area">
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch" style="background:#ffca28"></span>Pivot</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#ff6584"></span>Comparing</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#43e97b"></span>Sorted</span>
+    </div>
+    <svg class="viz-svg" id="svg-quick"></svg>
+  </div>
+  <div class="controls">
+    <button class="btn btn-primary" onclick="startSort('quick')">&#9654; Sort</button>
+    <button class="btn btn-secondary" onclick="resetSort('quick')">&#8635; Reset</button>
+    <div class="speed-control"><span>Speed</span><input type="range" min="1" max="10" value="5" id="speed-quick"></div>
+  </div>
+  <div class="status-text" id="status-quick">Press Sort to begin</div>
+  <div class="steps">
+    <div class="step"><div class="step-num">Step 1</div><p>Choose a pivot element (last element here)</p></div>
+    <div class="step"><div class="step-num">Step 2</div><p>Partition: move smaller elements left, larger right</p></div>
+    <div class="step"><div class="step-num">Step 3</div><p>Place pivot in its final sorted position</p></div>
+    <div class="step"><div class="step-num">Step 4</div><p>Recursively sort the left and right partitions</p></div>
+  </div>
+</div>
+</section>
+
+<footer class="footer">
+  Sorting Algorithms Visual Guide &mdash; All animations run entirely in-browser with SVG + JavaScript
+</footer>
+
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+const BAR_COUNT = 20;
+const COLORS = {
+  default: '#6c63ff',
+  compare: '#ffca28',
+  swap: '#ff6584',
+  sorted: '#43e97b',
+  pivot: '#ffca28',
+  subarray: '#00b4d8',
+  key: '#ffca28',
+  shifting: '#ff6584',
+  min: '#ffca28',
+};
+
+const state = {};
+
+function generateArray() {
+  const arr = [];
+  for (let i = 0; i < BAR_COUNT; i++) arr.push(Math.floor(Math.random() * 90) + 10);
+  return arr;
+}
+
+function initViz(name) {
+  const svg = document.getElementById(`svg-${name}`);
+  const arr = generateArray();
+  state[name] = { arr: [...arr], original: [...arr], running: false, cancelled: false };
+  drawBars(name);
+}
+
+function drawBars(name, colors = {}) {
+  const svg = document.getElementById(`svg-${name}`);
+  const { arr } = state[name];
+  svg.innerHTML = '';
+  const w = svg.clientWidth || svg.getBoundingClientRect().width || 800;
+  const h = svg.clientHeight || svg.getBoundingClientRect().height || 200;
+  const gap = 3;
+  const barW = (w - gap * (arr.length + 1)) / arr.length;
+  const maxVal = 100;
+
+  arr.forEach((val, i) => {
+    const barH = (val / maxVal) * (h - 30);
+    const x = gap + i * (barW + gap);
+    const y = h - barH - 15;
+    const color = colors[i] || COLORS.default;
+
+    const rect = document.createElementNS(NS, 'rect');
+    rect.setAttribute('x', x);
+    rect.setAttribute('y', y);
+    rect.setAttribute('width', barW);
+    rect.setAttribute('height', barH);
+    rect.setAttribute('rx', 3);
+    rect.setAttribute('fill', color);
+    rect.style.transition = 'all 0.15s ease';
+    svg.appendChild(rect);
+
+    const text = document.createElementNS(NS, 'text');
+    text.setAttribute('x', x + barW / 2);
+    text.setAttribute('y', h - 2);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('fill', '#7a7f9a');
+    text.setAttribute('font-size', barW > 18 ? '10' : '8');
+    text.setAttribute('font-family', 'system-ui, sans-serif');
+    text.textContent = val;
+    svg.appendChild(text);
+  });
+}
+
+function getDelay(name) {
+  const slider = document.getElementById(`speed-${name}`);
+  const speed = slider ? parseInt(slider.value) : 5;
+  return Math.max(20, 500 - speed * 45);
+}
+
+function setStatus(name, msg) {
+  document.getElementById(`status-${name}`).textContent = msg;
+}
+
+function sleep(name) {
+  return new Promise(r => setTimeout(r, getDelay(name)));
+}
+
+function resetSort(name) {
+  state[name].cancelled = true;
+  state[name].running = false;
+  state[name].arr = [...state[name].original];
+  drawBars(name);
+  setStatus(name, 'Press Sort to begin');
+}
+
+async function startSort(name) {
+  if (state[name].running) return;
+  state[name].cancelled = false;
+  state[name].running = true;
+  state[name].original = [...state[name].arr];
+
+  // re-shuffle for a fresh demo
+  state[name].arr = generateArray();
+  state[name].original = [...state[name].arr];
+  drawBars(name);
+
+  setStatus(name, 'Sorting...');
+
+  switch (name) {
+    case 'bubble': await bubbleSort(name); break;
+    case 'selection': await selectionSort(name); break;
+    case 'insertion': await insertionSort(name); break;
+    case 'merge': await mergeSortViz(name); break;
+    case 'quick': await quickSortViz(name); break;
+  }
+
+  if (!state[name].cancelled) {
+    const colors = {};
+    state[name].arr.forEach((_, i) => colors[i] = COLORS.sorted);
+    drawBars(name, colors);
+    setStatus(name, 'Sorted!');
+  }
+  state[name].running = false;
+}
+
+// ===== BUBBLE SORT =====
+async function bubbleSort(name) {
+  const arr = state[name].arr;
+  const n = arr.length;
+  for (let i = 0; i < n - 1; i++) {
+    let swapped = false;
+    for (let j = 0; j < n - i - 1; j++) {
+      if (state[name].cancelled) return;
+      const colors = {};
+      for (let k = n - i; k < n; k++) colors[k] = COLORS.sorted;
+      colors[j] = COLORS.compare;
+      colors[j + 1] = COLORS.compare;
+      drawBars(name, colors);
+      setStatus(name, `Comparing index ${j} (${arr[j]}) and ${j+1} (${arr[j+1]})`);
+      await sleep(name);
+
+      if (arr[j] > arr[j + 1]) {
+        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+        swapped = true;
+        colors[j] = COLORS.swap;
+        colors[j + 1] = COLORS.swap;
+        drawBars(name, colors);
+        setStatus(name, `Swapped ${arr[j+1]} and ${arr[j]}`);
+        await sleep(name);
+      }
+    }
+    if (!swapped) break;
+  }
+}
+
+// ===== SELECTION SORT =====
+async function selectionSort(name) {
+  const arr = state[name].arr;
+  const n = arr.length;
+  for (let i = 0; i < n - 1; i++) {
+    let minIdx = i;
+    for (let j = i + 1; j < n; j++) {
+      if (state[name].cancelled) return;
+      const colors = {};
+      for (let k = 0; k < i; k++) colors[k] = COLORS.sorted;
+      colors[minIdx] = COLORS.min;
+      colors[j] = COLORS.swap;
+      drawBars(name, colors);
+      setStatus(name, `Scanning: current min = ${arr[minIdx]} at [${minIdx}], checking [${j}] = ${arr[j]}`);
+      await sleep(name);
+      if (arr[j] < arr[minIdx]) minIdx = j;
+    }
+    if (minIdx !== i) {
+      [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
+      const colors = {};
+      for (let k = 0; k <= i; k++) colors[k] = COLORS.sorted;
+      drawBars(name, colors);
+      setStatus(name, `Placed ${arr[i]} at position ${i}`);
+      await sleep(name);
+    }
+  }
+}
+
+// ===== INSERTION SORT =====
+async function insertionSort(name) {
+  const arr = state[name].arr;
+  const n = arr.length;
+  for (let i = 1; i < n; i++) {
+    const key = arr[i];
+    let j = i - 1;
+    const colors = {};
+    for (let k = 0; k < i; k++) colors[k] = COLORS.sorted;
+    colors[i] = COLORS.key;
+    drawBars(name, colors);
+    setStatus(name, `Key = ${key} at index ${i}, finding its position`);
+    await sleep(name);
+
+    while (j >= 0 && arr[j] > key) {
+      if (state[name].cancelled) return;
+      arr[j + 1] = arr[j];
+      const c2 = {};
+      for (let k = 0; k < i; k++) c2[k] = COLORS.sorted;
+      c2[j] = COLORS.shifting;
+      c2[j + 1] = COLORS.shifting;
+      drawBars(name, c2);
+      setStatus(name, `Shifting ${arr[j]} right`);
+      await sleep(name);
+      j--;
+    }
+    arr[j + 1] = key;
+    const c3 = {};
+    for (let k = 0; k <= i; k++) c3[k] = COLORS.sorted;
+    drawBars(name, c3);
+    setStatus(name, `Inserted ${key} at position ${j + 1}`);
+    await sleep(name);
+  }
+}
+
+// ===== MERGE SORT =====
+async function mergeSortViz(name) {
+  const arr = state[name].arr;
+  await mergeSortRec(name, arr, 0, arr.length - 1);
+}
+
+async function mergeSortRec(name, arr, l, r) {
+  if (l >= r || state[name].cancelled) return;
+  const mid = Math.floor((l + r) / 2);
+  await mergeSortRec(name, arr, l, mid);
+  await mergeSortRec(name, arr, mid + 1, r);
+  await merge(name, arr, l, mid, r);
+}
+
+async function merge(name, arr, l, mid, r) {
+  if (state[name].cancelled) return;
+  const left = arr.slice(l, mid + 1);
+  const right = arr.slice(mid + 1, r + 1);
+  let i = 0, j = 0, k = l;
+
+  while (i < left.length && j < right.length) {
+    if (state[name].cancelled) return;
+    const colors = {};
+    for (let x = l; x <= r; x++) colors[x] = COLORS.subarray;
+    colors[k] = COLORS.compare;
+    drawBars(name, colors);
+    setStatus(name, `Merging [${l}..${r}]: comparing ${left[i]} and ${right[j]}`);
+    await sleep(name);
+
+    if (left[i] <= right[j]) { arr[k++] = left[i++]; }
+    else { arr[k++] = right[j++]; }
+    drawBars(name, colors);
+  }
+  while (i < left.length) { arr[k++] = left[i++]; }
+  while (j < right.length) { arr[k++] = right[j++]; }
+
+  const colors = {};
+  for (let x = l; x <= r; x++) colors[x] = COLORS.sorted;
+  drawBars(name, colors);
+  setStatus(name, `Merged sub-array [${l}..${r}]`);
+  await sleep(name);
+}
+
+// ===== QUICK SORT =====
+async function quickSortViz(name) {
+  const arr = state[name].arr;
+  await quickSortRec(name, arr, 0, arr.length - 1);
+}
+
+async function quickSortRec(name, arr, low, high) {
+  if (low >= high || state[name].cancelled) return;
+  const pi = await partition(name, arr, low, high);
+  if (state[name].cancelled) return;
+  await quickSortRec(name, arr, low, pi - 1);
+  await quickSortRec(name, arr, pi + 1, high);
+}
+
+async function partition(name, arr, low, high) {
+  const pivot = arr[high];
+  let i = low - 1;
+
+  for (let j = low; j < high; j++) {
+    if (state[name].cancelled) return -1;
+    const colors = {};
+    colors[high] = COLORS.pivot;
+    colors[j] = COLORS.swap;
+    if (i >= low) colors[i] = '#a78bfa';
+    drawBars(name, colors);
+    setStatus(name, `Pivot = ${pivot}, comparing [${j}] = ${arr[j]}`);
+    await sleep(name);
+
+    if (arr[j] < pivot) {
+      i++;
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+      drawBars(name, colors);
+      await sleep(name);
+    }
+  }
+  [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
+  const colors = {};
+  colors[i + 1] = COLORS.sorted;
+  drawBars(name, colors);
+  setStatus(name, `Pivot ${pivot} placed at index ${i + 1}`);
+  await sleep(name);
+  return i + 1;
+}
+
+// Initialize all visualizations
+['bubble', 'selection', 'insertion', 'merge', 'quick'].forEach(initViz);
+
+// Handle resize
+window.addEventListener('resize', () => {
+  ['bubble', 'selection', 'insertion', 'merge', 'quick'].forEach(name => {
+    if (!state[name].running) drawBars(name);
+  });
+});
+</script>
+
+</body>
+</html>
